@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile · UNIDATE</title>
+
+<style>
+  :root{
+    --bg: #050505;
+    --coral: #ff5d73;
+    --coral-soft: #ff8fa3;
+    --amber: #ffb15e;
+    --mint: #6ee7c7;
+    --sky: #7ec8ff;
+    --line: rgba(255,255,255,0.10);
+    --text-dim: rgba(255,255,255,0.55);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html,body{ height:100%; background:var(--bg); color:#fff; font-family:'Helvetica Neue', Arial, sans-serif; }
+
+  body{ display:flex; justify-content:center; }
+
+  .app{
+    position:relative;
+    width:100%;
+    max-width:430px;
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    background:
+      radial-gradient(ellipse 70% 30% at 20% 0%, rgba(255,93,115,0.14), transparent 60%),
+      radial-gradient(ellipse 60% 30% at 90% 15%, rgba(255,177,94,0.10), transparent 60%),
+      #050505;
+    overflow:hidden;
+  }
+
+  .grain{
+    position:absolute; inset:0; z-index:5; pointer-events:none;
+    opacity:0.045; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .scroll{
+    flex:1;
+    overflow-y:auto;
+    position:relative;
+    z-index:2;
+    padding-bottom:14px;
+  }
+  .scroll::-webkit-scrollbar{ width:0; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 20px 6px;
+  }
+
+  .topbar h1{
+    font-size:1.05rem;
+    font-weight:800;
+    letter-spacing:-0.01em;
+  }
+
+  .icon-btn{
+    width:38px; height:38px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.04);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    cursor:pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .icon-btn:hover{ background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+  .icon-btn svg{ width:17px; height:17px; }
+
+  /* ---------- hero card ---------- */
+  .hero{
+    margin:14px 20px 0;
+    border-radius:24px;
+    padding:26px 20px 20px;
+    text-align:center;
+    background: rgba(255,255,255,0.03);
+    border:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+
+  .hero::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(255,93,115,0.16), transparent 70%);
+    pointer-events:none;
+  }
+
+  .avatar-wrap{
+    position:relative;
+    width:104px; height:104px;
+    margin:0 auto 14px;
+  }
+
+  .avatar{
+    width:100%; height:100%;
+    border-radius:50%;
+    background: linear-gradient(135deg, var(--coral), var(--amber));
+    display:flex; align-items:center; justify-content:center;
+    font-size:2.6rem;
+    font-weight:800;
+    border:3px solid rgba(255,255,255,0.12);
+  }
+
+  .verified{
+    position:absolute;
+    bottom:2px; right:2px;
+    width:28px; height:28px;
+    border-radius:50%;
+    background: var(--sky);
+    border:3px solid #0b0b0b;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .verified svg{ width:13px; height:13px; color:#0a0a0a; }
+
+  .name-line{
+    font-size:1.35rem;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    margin-bottom:3px;
+  }
+
+  .sub-line{
+    font-size:0.83rem;
+    color: var(--text-dim);
+    margin-bottom:16px;
+  }
+
+  .edit-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:11px 24px;
+    border-radius:100px;
+    border:none;
+    font-size:0.82rem;
+    font-weight:700;
+    color:#0a0a0a;
+    background: linear-gradient(100deg, var(--coral), var(--amber));
+    cursor:pointer;
+    box-shadow: 0 10px 24px -10px rgba(255,93,115,0.55);
+    transition: transform 0.2s ease;
+  }
+  .edit-btn:hover{ transform: translateY(-2px); }
+
+  /* ---------- stats ---------- */
+  .stats{
+    display:flex;
+    margin:16px 20px 0;
+    border-radius:18px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.03);
+    overflow:hidden;
+  }
+  .stat{
+    flex:1;
+    text-align:center;
+    padding:15px 8px;
+    border-right:1px solid var(--line);
+  }
+  .stat:last-child{ border-right:none; }
+  .stat .num{ font-size:1.15rem; font-weight:800; }
+  .stat .num.coral{ color: var(--coral-soft); }
+  .stat .num.amber{ color: var(--amber); }
+  .stat .num.mint{ color: var(--mint); }
+  .stat .label{ font-size:0.66rem; color: var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; margin-top:3px; }
+
+  /* ---------- generic section ---------- */
+  .section{
+    margin:22px 20px 0;
+  }
+  .section-title{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color: var(--text-dim);
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .section-title .edit-link{
+    color: var(--coral-soft);
+    text-transform:none;
+    letter-spacing:0;
+    font-size:0.75rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+
+  .bio-card{
+    padding:16px 18px;
+    border-radius:16px;
+    background: rgba(255,255,255,0.03);
+    border:1px solid var(--line);
+    font-size:0.88rem;
+    line-height:1.55;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .prompt-card{
+    padding:16px 18px;
+    border-radius:16px;
+    background: rgba(255,255,255,0.03);
+    border:1px solid var(--line);
+    margin-bottom:10px;
+  }
+  .prompt-card .q{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color: var(--coral-soft);
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .prompt-card .a{
+    font-size:0.9rem;
+    line-height:1.5;
+  }
+
+  .tags{ display:flex; flex-wrap:wrap; gap:8px; }
+  .tag{
+    padding:8px 14px;
+    border-radius:100px;
+    background: rgba(255,255,255,0.05);
+    border:1px solid var(--line);
+    font-size:0.78rem;
+  }
+
+  .gallery{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:8px;
+  }
+  .gallery .g-item{
+    aspect-ratio:3/4;
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800;
+    font-size:1.3rem;
+    color:rgba(255,255,255,0.85);
+    border:1px solid var(--line);
+  }
+  .gallery .g-add{
+    background: rgba(255,255,255,0.03);
+    color: var(--text-dim);
+    display:flex; flex-direction:column; gap:4px;
+    font-size:0.62rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .gallery .g-add svg{ width:20px; height:20px; }
+
+  .settings-list{
+    border-radius:16px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.03);
+    overflow:hidden;
+  }
+  .settings-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px 16px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    transition: background 0.15s ease;
+  }
+  .settings-row:last-child{ border-bottom:none; }
+  .settings-row:hover{ background: rgba(255,255,255,0.03); }
+  .settings-row .ic{
+    width:32px; height:32px;
+    border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(255,255,255,0.06);
+    flex-shrink:0;
+  }
+  .settings-row .ic svg{ width:16px; height:16px; }
+  .settings-row .txt{ flex:1; font-size:0.87rem; font-weight:500; }
+  .settings-row .chev{ color: var(--text-dim); }
+  .settings-row .chev svg{ width:15px; height:15px; }
+  .settings-row.danger .txt{ color: var(--coral-soft); }
+
+  /* ---------- bottom nav ---------- */
+  .navbar{
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    padding:12px 10px calc(14px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--line);
+    background: rgba(8,8,8,0.75);
+    backdrop-filter: blur(14px);
+    position:relative;
+    z-index:2;
+  }
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    color: rgba(255,255,255,0.4);
+    font-size:0.62rem;
+    cursor:pointer;
+    position:relative;
+    padding:4px 10px;
+  }
+  .nav-item svg{ width:21px; height:21px; }
+  .nav-item.active{ color:#fff; }
+  .nav-item.active svg{ color: var(--coral); }
+  .nav-item .badge{
+    position:absolute; top:-1px; right:2px;
+    width:15px; height:15px; border-radius:50%;
+    background: var(--coral); color:#fff;
+    font-size:0.55rem; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  @keyframes shine { 0%{background-position:220% center;} 100%{background-position:-120% center;} }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <div class="grain"></div>
+
+  <div class="scroll">
+
+    <div class="topbar">
+      <h1>Your profile</h1>
+      <div class="icon-btn" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="avatar-wrap">
+        <div class="avatar">M</div>
+        <div class="verified" title="Verified student">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 1.9 3-.6 1 2.9 2.9 1-.6 3L22 12l-1.9 2.4.6 3-2.9 1-1 2.9-3-.6L12 22l-2.4-1.9-3 .6-1-2.9-2.9-1 .6-3L2 12l1.9-2.4-.6-3 2.9-1 1-2.9 3 .6z"/><path d="M9 12l2 2 4-4" stroke="#0a0a0a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="name-line">Meera, 19</div>
+      <div class="sub-line">Freshman · Design · State University</div>
+      <button class="edit-btn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+        Edit profile
+      </button>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num coral">128</div><div class="label">Likes</div></div>
+      <div class="stat"><div class="num amber">34</div><div class="label">Matches</div></div>
+      <div class="stat"><div class="num mint">92%</div><div class="label">Match rate</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">About me <span class="edit-link">Edit</span></div>
+      <div class="bio-card">
+        Design major who's always got a sketchbook on hand. Probably in the studio at 1am or trying a new chai spot near campus. Looking for someone to explore the city with between classes.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Prompts</div>
+      <div class="prompt-card">
+        <div class="q">A perfect Sunday looks like</div>
+        <div class="a">Farmer's market, sketching in the park, then a movie marathon with too much popcorn.</div>
+      </div>
+      <div class="prompt-card">
+        <div class="q">I'll know it's a match if</div>
+        <div class="a">You can debate whether cereal is a soup and actually commit to an answer.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Interests</div>
+      <div class="tags">
+        <div class="tag">🎨 Sketching</div>
+        <div class="tag">☕ Chai over coffee</div>
+        <div class="tag">🧵 Thrifting</div>
+        <div class="tag">🌧️ Rainy walks</div>
+        <div class="tag">🎬 Studio Ghibli</div>
+        <div class="tag">📚 Poetry</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Photos <span class="edit-link">Manage</span></div>
+      <div class="gallery">
+        <div class="g-item" style="background:linear-gradient(135deg,#ff5d73,#ffb15e)">M</div>
+        <div class="g-item" style="background:linear-gradient(135deg,#7ec8ff,#6ee7c7)">M</div>
+        <div class="g-item" style="background:linear-gradient(135deg,#ffb15e,#ff8fa3)">M</div>
+        <div class="g-item" style="background:linear-gradient(135deg,#6ee7c7,#7ec8ff)">M</div>
+        <div class="g-item" style="background:linear-gradient(135deg,#ff8fa3,#ff5d73)">M</div>
+        <div class="g-item g-add">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add photo
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Account</div>
+      <div class="settings-list">
+        <div class="settings-row">
+          <div class="ic" style="color:var(--sky)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="txt">Privacy & visibility</div>
+          <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="settings-row">
+          <div class="ic" style="color:var(--mint)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+          </div>
+          <div class="txt">Verification</div>
+          <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="settings-row">
+          <div class="ic" style="color:var(--amber)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div class="txt">Notifications</div>
+          <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="settings-row danger">
+          <div class="ic" style="color:var(--coral)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </div>
+          <div class="txt">Log out</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="navbar">
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a6.5 6.5 0 1 1-13 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+      Discover
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      Matches
+      <span class="badge">3</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      Chats
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      Profile
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

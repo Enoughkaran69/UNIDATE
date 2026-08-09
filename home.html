@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discover · UNIDATE</title>
+
+<style>
+  :root{
+    --bg: #050505;
+    --coral: #ff5d73;
+    --coral-soft: #ff8fa3;
+    --amber: #ffb15e;
+    --mint: #6ee7c7;
+    --line: rgba(255,255,255,0.10);
+    --text-dim: rgba(255,255,255,0.55);
+    --panel: rgba(18,18,18,0.9);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html,body{
+    height:100%;
+    background:var(--bg);
+    color:#fff;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    overflow:hidden;
+  }
+
+  body{
+    display:flex;
+    justify-content:center;
+  }
+
+  /* ---------- phone-ish frame ---------- */
+  .app{
+    position:relative;
+    width:100%;
+    max-width:430px;
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    background:
+      radial-gradient(ellipse 70% 35% at 25% 0%, rgba(255,93,115,0.14), transparent 60%),
+      radial-gradient(ellipse 60% 30% at 90% 100%, rgba(255,177,94,0.10), transparent 60%),
+      #050505;
+    overflow:hidden;
+  }
+
+  .grain{
+    position:absolute; inset:0; z-index:5; pointer-events:none;
+    opacity:0.045; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 20px 10px;
+    position:relative;
+    z-index:2;
+  }
+
+  .brand{
+    font-size:1.15rem;
+    font-weight:800;
+    letter-spacing:-0.03em;
+    text-transform:uppercase;
+    background: linear-gradient(100deg, #fff 20%, var(--coral-soft) 50%, #fff 80%);
+    background-size:220% auto;
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    animation: shine 5s linear infinite;
+  }
+
+  .icon-btn{
+    width:38px; height:38px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.04);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    cursor:pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .icon-btn:hover{ background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+  .icon-btn svg{ width:17px; height:17px; }
+
+  .topbar-actions{ display:flex; gap:10px; }
+
+  /* campus pill */
+  .campus-pill{
+    margin: 4px 20px 14px;
+    align-self:flex-start;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:7px 13px;
+    border-radius:100px;
+    background: rgba(255,255,255,0.05);
+    border:1px solid var(--line);
+    font-size:0.72rem;
+    color:var(--text-dim);
+    letter-spacing:0.03em;
+    width:fit-content;
+    z-index:2;
+  }
+  .campus-pill .live-dot{
+    width:6px; height:6px; border-radius:50%;
+    background: var(--mint);
+    box-shadow:0 0 0 0 rgba(110,231,199,0.6);
+    animation: pulseDot 2s infinite;
+  }
+
+  @keyframes pulseDot{
+    0%{ box-shadow:0 0 0 0 rgba(110,231,199,0.55);}
+    70%{ box-shadow:0 0 0 7px rgba(110,231,199,0);}
+    100%{ box-shadow:0 0 0 0 rgba(110,231,199,0);}
+  }
+
+  /* ---------- card stack ---------- */
+  .stack-wrap{
+    position:relative;
+    flex:1;
+    margin: 0 18px;
+    z-index:2;
+  }
+
+  .card{
+    position:absolute;
+    inset:0;
+    border-radius:26px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    box-shadow: 0 30px 60px -25px rgba(0,0,0,0.8);
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    cursor:grab;
+    user-select:none;
+    touch-action:none;
+    transition: transform 0.35s cubic-bezier(.2,.8,.2,1), opacity 0.35s ease;
+    will-change: transform;
+  }
+  .card:active{ cursor:grabbing; }
+
+  .card .photo{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:5.5rem;
+    font-weight:800;
+    color:rgba(255,255,255,0.92);
+  }
+
+  .card .photo-fade{
+    position:absolute; inset:0;
+    background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0) 70%);
+  }
+
+  .card .info{
+    position:relative;
+    z-index:2;
+    padding:22px 22px 26px;
+  }
+
+  .card .name-row{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    margin-bottom:4px;
+  }
+  .card .name-row .name{ font-size:1.5rem; font-weight:800; }
+  .card .name-row .age{ font-size:1.2rem; color:rgba(255,255,255,0.7); font-weight:500; }
+
+  .card .match{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    margin-left:auto;
+    padding:4px 10px;
+    border-radius:100px;
+    background: rgba(255,93,115,0.18);
+    border:1px solid rgba(255,93,115,0.4);
+    color:var(--coral-soft);
+    font-size:0.72rem;
+    font-weight:700;
+  }
+
+  .card .meta{
+    font-size:0.85rem;
+    color:rgba(255,255,255,0.7);
+    margin-bottom:12px;
+  }
+
+  .card .tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+  }
+
+  .card .tag{
+    padding:6px 11px;
+    border-radius:100px;
+    background: rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    font-size:0.72rem;
+    color:#fff;
+    backdrop-filter: blur(6px);
+  }
+
+  .stamp{
+    position:absolute;
+    top:34px;
+    padding:8px 16px;
+    border-radius:10px;
+    font-size:1.2rem;
+    font-weight:800;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    border:3px solid;
+    opacity:0;
+    z-index:3;
+    transform: rotate(-18deg);
+    pointer-events:none;
+    transition: opacity 0.15s ease;
+  }
+  .stamp.like{ left:26px; color: var(--mint); border-color: var(--mint); transform:rotate(-18deg); }
+  .stamp.nope{ right:26px; color: var(--coral); border-color: var(--coral); transform:rotate(18deg); }
+
+  .empty-state{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:12px;
+    text-align:center;
+    padding:30px;
+    color: var(--text-dim);
+  }
+  .empty-state .big{ font-size:2.2rem; }
+  .empty-state h3{ color:#fff; font-size:1.1rem; }
+  .empty-state button{
+    margin-top:10px;
+    padding:11px 22px;
+    border-radius:100px;
+    border:none;
+    font-weight:700;
+    font-size:0.82rem;
+    color:#0a0a0a;
+    background: linear-gradient(100deg, var(--coral), var(--amber));
+    cursor:pointer;
+  }
+
+  /* ---------- action buttons ---------- */
+  .actions{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    padding:20px 20px 10px;
+    position:relative;
+    z-index:2;
+  }
+
+  .action-btn{
+    border-radius:50%;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.05);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .action-btn:active{ transform: scale(0.9); }
+
+  .action-btn.pass{ width:56px; height:56px; color: var(--coral); }
+  .action-btn.pass:hover{ box-shadow: 0 0 0 6px rgba(255,93,115,0.1); }
+
+  .action-btn.super{ width:46px; height:46px; color: #7ec8ff; }
+  .action-btn.super:hover{ box-shadow: 0 0 0 6px rgba(126,200,255,0.1); }
+
+  .action-btn.like{
+    width:62px; height:62px;
+    background: linear-gradient(100deg, var(--coral), var(--amber));
+    border:none;
+    color:#0a0a0a;
+  }
+  .action-btn.like:hover{ box-shadow: 0 8px 24px -6px rgba(255,93,115,0.6); }
+
+  .action-btn svg{ width:24px; height:24px; }
+  .action-btn.super svg{ width:19px; height:19px; }
+
+  /* ---------- bottom nav ---------- */
+  .navbar{
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    padding:12px 10px calc(14px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--line);
+    background: rgba(8,8,8,0.75);
+    backdrop-filter: blur(14px);
+    position:relative;
+    z-index:2;
+  }
+
+  .nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    color: rgba(255,255,255,0.4);
+    font-size:0.62rem;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    transition: color 0.2s ease;
+    position:relative;
+    padding:4px 10px;
+  }
+  .nav-item svg{ width:21px; height:21px; }
+  .nav-item.active{ color:#fff; }
+  .nav-item.active svg{ color: var(--coral); }
+
+  .nav-item .badge{
+    position:absolute;
+    top:-1px; right:2px;
+    width:15px; height:15px;
+    border-radius:50%;
+    background: var(--coral);
+    color:#fff;
+    font-size:0.55rem;
+    font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  @keyframes shine { 0%{background-position:220% center;} 100%{background-position:-120% center;} }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <div class="grain"></div>
+
+  <div class="topbar">
+    <div class="brand">UNIDATE</div>
+    <div class="topbar-actions">
+      <div class="icon-btn" title="Filters">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="11" cy="18" r="2" fill="currentColor" stroke="none"/></svg>
+      </div>
+      <div class="icon-btn" title="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="campus-pill"><span class="live-dot"></span> 214 students online at your campus</div>
+
+  <div class="stack-wrap" id="stackWrap"></div>
+
+  <div class="actions">
+    <button class="action-btn pass" id="btnPass" title="Pass">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+    </button>
+    <button class="action-btn super" id="btnSuper" title="Superlike">
+      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 14.9 8.6 22 9.3 16.6 14 18.2 21 12 17.3 5.8 21 7.4 14 2 9.3 9.1 8.6"/></svg>
+    </button>
+    <button class="action-btn like" id="btnLike" title="Like">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-6.7-4.3-9.3-8.1C1 10.2 1.8 6.7 4.7 5.3 7 4.2 9.5 5 11 7c1.5-2 4-2.8 6.3-1.7 2.9 1.4 3.7 4.9 2 7.6C18.7 16.7 12 21 12 21z"/></svg>
+    </button>
+  </div>
+
+  <div class="navbar">
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a6.5 6.5 0 1 1-13 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+      Discover
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      Matches
+      <span class="badge">3</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      Chats
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      Profile
+    </div>
+  </div>
+</div>
+
+<script>
+  const profiles = [
+    {
+      name:"Ananya", age:20, initials:"A",
+      meta:"Sophomore · Psychology · 0.6 mi away",
+      match:92,
+      grad:"linear-gradient(135deg, #ff5d73, #ffb15e)",
+      tags:["Coffee runs ☕","Late-night library","K-drama fan","Badminton"]
+    },
+    {
+      name:"Rohan", age:21, initials:"R",
+      meta:"Junior · Mechanical Eng · 1.2 mi away",
+      match:87,
+      grad:"linear-gradient(135deg, #7ec8ff, #6ee7c7)",
+      tags:["Gym at 6am","Indie music","Chess club","Road trips"]
+    },
+    {
+      name:"Meera", age:19, initials:"M",
+      meta:"Freshman · Design · 0.3 mi away",
+      match:95,
+      grad:"linear-gradient(135deg, #ffb15e, #ff5d73)",
+      tags:["Sketchbook always on hand","Thrift shopping","Rainy day walks","Chai over coffee"]
+    },
+    {
+      name:"Kabir", age:22, initials:"K",
+      meta:"Senior · Computer Science · 2.1 mi away",
+      match:81,
+      grad:"linear-gradient(135deg, #6ee7c7, #7ec8ff)",
+      tags:["Hackathons","Lo-fi playlists","Street food tours","Cricket on weekends"]
+    },
+    {
+      name:"Ishita", age:20, initials:"I",
+      meta:"Sophomore · Journalism · 0.9 mi away",
+      match:89,
+      grad:"linear-gradient(135deg, #ff8fa3, #ffb15e)",
+      tags:["Campus newspaper","Vinyl collector","Debate team","Bookstore dates"]
+    }
+  ];
+
+  const stackWrap = document.getElementById('stackWrap');
+  let deck = [...profiles];
+  let cardEls = [];
+
+  function renderStack(){
+    stackWrap.innerHTML = '';
+    cardEls = [];
+
+    if(deck.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = `
+        <div class="big">✨</div>
+        <h3>You're all caught up</h3>
+        <p>Check back later for more people near your campus.</p>
+        <button id="resetBtn">Reset demo</button>
+      `;
+      stackWrap.appendChild(empty);
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        deck = [...profiles];
+        renderStack();
+      });
+      return;
+    }
+
+    const visible = deck.slice(0, 3).reverse();
+    visible.forEach((p, idx) => {
+      const depth = visible.length - 1 - idx; // 0 = top card
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.zIndex = 10 - depth;
+      card.style.transform = `translateY(${depth*10}px) scale(${1 - depth*0.045})`;
+      card.style.opacity = depth === 2 ? '0.6' : '1';
+
+      card.innerHTML = `
+        <div class="photo" style="background:${p.grad}">${p.initials}</div>
+        <div class="photo-fade"></div>
+        <div class="stamp like">LIKE</div>
+        <div class="stamp nope">NOPE</div>
+        <div class="info">
+          <div class="name-row">
+            <span class="name">${p.name}</span>
+            <span class="age">${p.age}</span>
+            <span class="match">🔥 ${p.match}% match</span>
+          </div>
+          <div class="meta">${p.meta}</div>
+          <div class="tags">${p.tags.map(t => `<div class="tag">${t}</div>`).join('')}</div>
+        </div>
+      `;
+
+      if(depth === 0){
+        enableDrag(card);
+      }
+
+      stackWrap.appendChild(card);
+      cardEls.unshift(card);
+    });
+  }
+
+  function enableDrag(card){
+    let startX, startY, curX = 0, curY = 0, dragging = false;
+    const likeStamp = card.querySelector('.stamp.like');
+    const nopeStamp = card.querySelector('.stamp.nope');
+
+    function pointerDown(e){
+      dragging = true;
+      card.style.transition = 'none';
+      const p = e.touches ? e.touches[0] : e;
+      startX = p.clientX; startY = p.clientY;
+    }
+
+    function pointerMove(e){
+      if(!dragging) return;
+      const p = e.touches ? e.touches[0] : e;
+      curX = p.clientX - startX;
+      curY = p.clientY - startY;
+      const rot = curX * 0.05;
+      card.style.transform = `translate(${curX}px, ${curY}px) rotate(${rot}deg)`;
+      likeStamp.style.opacity = curX > 30 ? Math.min(1, curX/100) : 0;
+      nopeStamp.style.opacity = curX < -30 ? Math.min(1, -curX/100) : 0;
+    }
+
+    function pointerUp(){
+      if(!dragging) return;
+      dragging = false;
+      card.style.transition = '';
+      if(curX > 110){
+        flyOut(card, 1);
+      } else if(curX < -110){
+        flyOut(card, -1);
+      } else {
+        card.style.transform = '';
+        likeStamp.style.opacity = 0;
+        nopeStamp.style.opacity = 0;
+      }
+      curX = 0; curY = 0;
+    }
+
+    card.addEventListener('mousedown', pointerDown);
+    window.addEventListener('mousemove', pointerMove);
+    window.addEventListener('mouseup', pointerUp);
+    card.addEventListener('touchstart', pointerDown, {passive:true});
+    card.addEventListener('touchmove', pointerMove, {passive:true});
+    card.addEventListener('touchend', pointerUp);
+  }
+
+  function flyOut(card, dir){
+    card.style.transform = `translate(${dir*600}px, -40px) rotate(${dir*30}deg)`;
+    card.style.opacity = '0';
+    setTimeout(() => {
+      deck.shift();
+      renderStack();
+    }, 260);
+  }
+
+  function swipeTop(dir){
+    if(deck.length === 0) return;
+    const top = cardEls[cardEls.length - 1];
+    if(!top) return;
+    flyOut(top, dir);
+  }
+
+  document.getElementById('btnLike').addEventListener('click', () => swipeTop(1));
+  document.getElementById('btnPass').addEventListener('click', () => swipeTop(-1));
+  document.getElementById('btnSuper').addEventListener('click', () => {
+    if(deck.length === 0) return;
+    const top = cardEls[cardEls.length - 1];
+    if(!top) return;
+    top.style.transform = 'translateY(-700px) rotate(0deg)';
+    top.style.opacity = '0';
+    setTimeout(() => { deck.shift(); renderStack(); }, 260);
+  });
+
+  renderStack();
+</script>
+
+</body>
+</html>
