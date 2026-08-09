@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings · UNIDATE</title>
+
+<style>
+  :root{
+    --bg: #050505;
+    --coral: #ff5d73;
+    --coral-soft: #ff8fa3;
+    --amber: #ffb15e;
+    --mint: #6ee7c7;
+    --sky: #7ec8ff;
+    --line: rgba(255,255,255,0.10);
+    --text-dim: rgba(255,255,255,0.55);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; background:var(--bg); color:#fff; font-family:'Helvetica Neue', Arial, sans-serif; }
+  body{ display:flex; justify-content:center; overflow:hidden; }
+
+  .app{
+    position:relative;
+    width:100%;
+    max-width:430px;
+    height:100vh; height:100dvh;
+    display:flex; flex-direction:column;
+    background:
+      radial-gradient(ellipse 70% 30% at 20% 0%, rgba(255,93,115,0.13), transparent 60%),
+      radial-gradient(ellipse 60% 30% at 90% 10%, rgba(255,177,94,0.09), transparent 60%),
+      #050505;
+    overflow:hidden;
+  }
+
+  .grain{
+    position:absolute; inset:0; z-index:5; pointer-events:none;
+    opacity:0.045; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .topbar{
+    display:flex; align-items:center; gap:14px;
+    padding:18px 20px 10px;
+    position:relative; z-index:2;
+    border-bottom:1px solid var(--line);
+    padding-bottom:16px;
+  }
+  .icon-btn{
+    width:38px; height:38px; border-radius:50%;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.04);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; cursor:pointer; flex-shrink:0;
+    transition: background 0.2s ease;
+  }
+  .icon-btn:hover{ background: rgba(255,255,255,0.08); }
+  .icon-btn svg{ width:16px; height:16px; }
+  .topbar h1{ font-size:1.1rem; font-weight:800; letter-spacing:-0.02em; }
+
+  .scroll{
+    flex:1;
+    overflow-y:auto;
+    position:relative; z-index:2;
+    padding: 6px 20px 30px;
+  }
+  .scroll::-webkit-scrollbar{ display:none; }
+
+  /* ---------- profile mini header ---------- */
+  .mini-profile{
+    display:flex; align-items:center; gap:13px;
+    padding:16px 4px;
+    margin-top:8px;
+    cursor:pointer;
+  }
+  .mini-avatar{
+    width:52px; height:52px; border-radius:50%;
+    background: linear-gradient(135deg, var(--coral), var(--amber));
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:1.2rem;
+    flex-shrink:0;
+  }
+  .mini-info .name{ font-size:0.98rem; font-weight:700; }
+  .mini-info .sub{ font-size:0.78rem; color: var(--text-dim); margin-top:2px; }
+  .mini-chev{ margin-left:auto; color: var(--text-dim); }
+  .mini-chev svg{ width:16px; height:16px; }
+
+  /* ---------- premium banner ---------- */
+  .premium-banner{
+    margin: 10px 0 6px;
+    padding:16px 18px;
+    border-radius:18px;
+    background: linear-gradient(135deg, rgba(255,93,115,0.18), rgba(255,177,94,0.12));
+    border:1px solid rgba(255,93,115,0.3);
+    display:flex; align-items:center; gap:14px;
+    cursor:pointer;
+  }
+  .premium-icon{
+    width:42px; height:42px;
+    border-radius:12px;
+    background: linear-gradient(135deg, var(--coral), var(--amber));
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .premium-icon svg{ width:20px; height:20px; color:#0a0a0a; }
+  .premium-txt .t{ font-weight:800; font-size:0.9rem; }
+  .premium-txt .s{ font-size:0.76rem; color: var(--text-dim); margin-top:2px; }
+
+  /* ---------- section ---------- */
+  .section-label{
+    padding:22px 4px 10px;
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color: var(--text-dim);
+  }
+
+  .panel{
+    border-radius:16px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.03);
+    overflow:hidden;
+  }
+
+  .row{
+    display:flex; align-items:center; gap:12px;
+    padding:14px 16px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    transition: background 0.15s ease;
+  }
+  .row:last-child{ border-bottom:none; }
+  .row:hover{ background: rgba(255,255,255,0.03); }
+  .row .ic{
+    width:32px; height:32px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(255,255,255,0.06);
+    flex-shrink:0;
+  }
+  .row .ic svg{ width:16px; height:16px; }
+  .row .txt{ flex:1; font-size:0.87rem; font-weight:500; }
+  .row .val{ font-size:0.8rem; color: var(--text-dim); }
+  .row .chev{ color: var(--text-dim); }
+  .row .chev svg{ width:15px; height:15px; }
+  .row.danger .txt{ color: var(--coral-soft); }
+  .row.no-hover{ cursor:default; }
+
+  /* ---------- toggle switch ---------- */
+  .toggle{
+    position:relative;
+    width:44px; height:26px;
+    border-radius:100px;
+    background: rgba(255,255,255,0.12);
+    flex-shrink:0;
+    cursor:pointer;
+    transition: background 0.2s ease;
+    border:1px solid var(--line);
+  }
+  .toggle.on{ background: linear-gradient(100deg, var(--coral), var(--amber)); border-color:transparent; }
+  .toggle .knob{
+    position:absolute;
+    top:2px; left:2px;
+    width:20px; height:20px;
+    border-radius:50%;
+    background:#fff;
+    transition: transform 0.2s ease;
+  }
+  .toggle.on .knob{ transform: translateX(18px); }
+
+  /* ---------- sliders ---------- */
+  .slider-block{
+    padding:16px 16px 18px;
+    border-bottom:1px solid var(--line);
+  }
+  .slider-block:last-child{ border-bottom:none; }
+  .slider-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:12px;
+  }
+  .slider-head .lbl{ font-size:0.87rem; font-weight:500; }
+  .slider-head .amt{ font-size:0.85rem; font-weight:700; color: var(--coral-soft); }
+
+  .range-single{
+    width:100%;
+    -webkit-appearance:none;
+    height:4px;
+    border-radius:100px;
+    background: linear-gradient(90deg, var(--coral), var(--amber));
+    outline:none;
+  }
+  .range-single::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:20px; height:20px;
+    border-radius:50%;
+    background:#fff;
+    border:3px solid var(--coral);
+    cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .range-dual{
+    position:relative;
+    height:26px;
+  }
+  .range-dual .track{
+    position:absolute;
+    top:11px; left:0; right:0;
+    height:4px;
+    border-radius:100px;
+    background: rgba(255,255,255,0.14);
+  }
+  .range-dual .fill{
+    position:absolute;
+    top:11px; height:4px;
+    border-radius:100px;
+    background: linear-gradient(90deg, var(--coral), var(--amber));
+  }
+  .range-dual input[type=range]{
+    position:absolute;
+    top:0; left:0; width:100%;
+    -webkit-appearance:none;
+    background:transparent;
+    pointer-events:none;
+    margin:0;
+    height:26px;
+  }
+  .range-dual input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:20px; height:20px;
+    border-radius:50%;
+    background:#fff;
+    border:3px solid var(--coral);
+    cursor:pointer;
+    pointer-events:auto;
+    box-shadow:0 2px 6px rgba(0,0,0,0.4);
+    margin-top:1px;
+  }
+
+  .app-version{
+    text-align:center;
+    font-size:0.72rem;
+    color: rgba(255,255,255,0.25);
+    padding:26px 0 6px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <div class="grain"></div>
+
+  <div class="topbar">
+    <div class="icon-btn" id="backBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <h1>Settings</h1>
+  </div>
+
+  <div class="scroll">
+
+    <div class="mini-profile">
+      <div class="mini-avatar">M</div>
+      <div class="mini-info">
+        <div class="name">Meera Kapoor</div>
+        <div class="sub">meera.k@stateuniversity.edu</div>
+      </div>
+      <div class="mini-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>
+
+    <div class="premium-banner">
+      <div class="premium-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 14.9 8.6 22 9.3 16.6 14 18.2 21 12 17.3 5.8 21 7.4 14 2 9.3 9.1 8.6"/></svg>
+      </div>
+      <div class="premium-txt">
+        <div class="t">Get UNIDATE Plus</div>
+        <div class="s">Unlimited likes, see who liked you & more</div>
+      </div>
+    </div>
+
+    <div class="section-label">Discovery preferences</div>
+    <div class="panel">
+      <div class="slider-block">
+        <div class="slider-head"><span class="lbl">Age range</span><span class="amt" id="ageAmt">19 – 24</span></div>
+        <div class="range-dual">
+          <div class="track"></div>
+          <div class="fill" id="ageFill"></div>
+          <input type="range" min="18" max="30" value="19" id="ageMin">
+          <input type="range" min="18" max="30" value="24" id="ageMax">
+        </div>
+      </div>
+      <div class="slider-block">
+        <div class="slider-head"><span class="lbl">Maximum distance</span><span class="amt" id="distAmt">8 mi</span></div>
+        <input type="range" min="1" max="50" value="8" class="range-single" id="distSlider">
+      </div>
+      <div class="row no-hover">
+        <div class="ic" style="color:var(--sky)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div class="txt">Show me on Discover</div>
+        <div class="toggle on" data-toggle><div class="knob"></div></div>
+      </div>
+      <div class="row no-hover">
+        <div class="ic" style="color:var(--mint)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div class="txt">Global mode</div>
+        <div class="toggle" data-toggle><div class="knob"></div></div>
+      </div>
+    </div>
+
+    <div class="section-label">Notifications</div>
+    <div class="panel">
+      <div class="row no-hover">
+        <div class="ic" style="color:var(--coral)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+        <div class="txt">New matches</div>
+        <div class="toggle on" data-toggle><div class="knob"></div></div>
+      </div>
+      <div class="row no-hover">
+        <div class="ic" style="color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+        <div class="txt">Messages</div>
+        <div class="toggle on" data-toggle><div class="knob"></div></div>
+      </div>
+      <div class="row no-hover">
+        <div class="ic" style="color:var(--sky)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.7-4.3-9.3-8.1C1 10.2 1.8 6.7 4.7 5.3 7 4.2 9.5 5 11 7c1.5-2 4-2.8 6.3-1.7 2.9 1.4 3.7 4.9 2 7.6C18.7 16.7 12 21 12 21z"/></svg></div>
+        <div class="txt">Someone liked you</div>
+        <div class="toggle" data-toggle><div class="knob"></div></div>
+      </div>
+      <div class="row no-hover">
+        <div class="ic" style="color:var(--mint)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
+        <div class="txt">Product news & tips</div>
+        <div class="toggle" data-toggle><div class="knob"></div></div>
+      </div>
+    </div>
+
+    <div class="section-label">Privacy & safety</div>
+    <div class="panel">
+      <div class="row">
+        <div class="ic" style="color:var(--sky)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div class="txt">Blocked accounts</div>
+        <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+      <div class="row">
+        <div class="ic" style="color:var(--mint)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></div>
+        <div class="txt">Student verification</div>
+        <div class="val">Verified</div>
+        <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+      <div class="row">
+        <div class="ic" style="color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/></svg></div>
+        <div class="txt">Safety center</div>
+        <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+    </div>
+
+    <div class="section-label">Account</div>
+    <div class="panel">
+      <div class="row">
+        <div class="ic" style="color:var(--sky)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <div class="txt">Manage subscription</div>
+        <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+      <div class="row">
+        <div class="ic" style="color:var(--mint)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="txt">Help & support</div>
+        <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+      <div class="row">
+        <div class="ic" style="color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="txt">Terms & privacy policy</div>
+        <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+      <div class="row">
+        <div class="ic" style="color:var(--coral-soft)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+        <div class="txt">Log out</div>
+      </div>
+    </div>
+
+    <div class="section-label">Danger zone</div>
+    <div class="panel">
+      <div class="row danger">
+        <div class="ic" style="color:var(--coral)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 9V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2v-4"/><path d="M2 12h10m0 0l-3-3m3 3l-3 3" transform="rotate(180 8 12)"/></svg></div>
+        <div class="txt">Pause my account</div>
+        <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+      <div class="row danger">
+        <div class="ic" style="color:var(--coral)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></div>
+        <div class="txt">Delete account</div>
+        <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+    </div>
+
+    <div class="app-version">UNIDATE · Version 2.4.1</div>
+
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('[data-toggle]').forEach(t => {
+    t.addEventListener('click', () => t.classList.toggle('on'));
+  });
+
+  // ---- dual age range slider ----
+  const ageMin = document.getElementById('ageMin');
+  const ageMax = document.getElementById('ageMax');
+  const ageFill = document.getElementById('ageFill');
+  const ageAmt = document.getElementById('ageAmt');
+  const AGE_LO = 18, AGE_HI = 30;
+
+  function updateAgeSlider(){
+    let lo = parseInt(ageMin.value), hi = parseInt(ageMax.value);
+    if(lo > hi - 1){ lo = hi - 1; ageMin.value = lo; }
+    const pctLo = ((lo - AGE_LO) / (AGE_HI - AGE_LO)) * 100;
+    const pctHi = ((hi - AGE_LO) / (AGE_HI - AGE_LO)) * 100;
+    ageFill.style.left = pctLo + '%';
+    ageFill.style.width = (pctHi - pctLo) + '%';
+    ageAmt.textContent = `${lo} – ${hi}`;
+  }
+  ageMin.addEventListener('input', updateAgeSlider);
+  ageMax.addEventListener('input', updateAgeSlider);
+  updateAgeSlider();
+
+  // ---- distance slider ----
+  const distSlider = document.getElementById('distSlider');
+  const distAmt = document.getElementById('distAmt');
+  distSlider.addEventListener('input', () => {
+    distAmt.textContent = `${distSlider.value} mi`;
+  });
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    alert('This would return to unidate-profile.html');
+  });
+</script>
+
+</body>
+</html>
