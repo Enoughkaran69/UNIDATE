@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in · UNIDATE</title>
+
+<style>
+  :root{
+    --bg: #050505;
+    --coral: #ff5d73;
+    --coral-soft: #ff8fa3;
+    --amber: #ffb15e;
+    --line: rgba(255,255,255,0.10);
+    --text-dim: rgba(255,255,255,0.55);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html,body{ height:100%; background:var(--bg); overflow:hidden; }
+
+  body{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    color:#fff;
+  }
+
+  .bg-base{
+    position:fixed; inset:0; z-index:0;
+    background:
+      radial-gradient(ellipse 55% 40% at 15% 15%, rgba(255,93,115,0.14), transparent 60%),
+      radial-gradient(ellipse 55% 40% at 85% 85%, rgba(255,177,94,0.10), transparent 60%),
+      #050505;
+  }
+
+  .grain{
+    position:fixed; inset:0; z-index:2; pointer-events:none;
+    opacity:0.05; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  canvas#network{ position:fixed; inset:0; z-index:1; display:block; }
+
+  .vignette{
+    position:fixed; inset:0; z-index:3; pointer-events:none;
+    background: radial-gradient(ellipse 95% 95% at 50% 50%, transparent 40%, rgba(0,0,0,0.8) 100%);
+  }
+
+  /* ---------- card ---------- */
+  .card{
+    position:relative;
+    z-index:4;
+    width:min(400px, 90vw);
+    padding:38px 34px 32px;
+    border-radius:22px;
+    background: rgba(15,15,15,0.55);
+    border:1px solid var(--line);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7);
+    opacity:0;
+    animation: riseIn 0.7s ease forwards 0.1s;
+  }
+
+  .wordmark{
+    font-size:1.5rem;
+    font-weight:800;
+    letter-spacing:-0.04em;
+    text-transform:uppercase;
+    text-align:center;
+    background: linear-gradient(100deg, #fff 20%, var(--coral-soft) 50%, #fff 80%);
+    background-size:220% auto;
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    animation: shine 5s linear infinite;
+  }
+
+  .eyebrow{
+    text-align:center;
+    font-size:0.7rem;
+    letter-spacing:0.28em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin-top:8px;
+    margin-bottom:28px;
+  }
+
+  .field{
+    margin-bottom:16px;
+  }
+
+  .field label{
+    display:block;
+    font-size:0.72rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin-bottom:7px;
+    font-weight:600;
+  }
+
+  .field input{
+    width:100%;
+    padding:13px 14px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.04);
+    color:#fff;
+    font-size:0.92rem;
+    outline:none;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .field input::placeholder{ color:rgba(255,255,255,0.28); }
+
+  .field input:focus{
+    border-color: var(--coral-soft);
+    background: rgba(255,93,115,0.06);
+    box-shadow: 0 0 0 3px rgba(255,93,115,0.12);
+  }
+
+  .field small.hint{
+    display:block;
+    margin-top:6px;
+    font-size:0.7rem;
+    color:rgba(255,255,255,0.32);
+  }
+
+  .row-between{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin: -4px 0 22px;
+  }
+
+  .remember{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:0.78rem;
+    color:var(--text-dim);
+  }
+
+  .remember input{ accent-color: var(--coral); }
+
+  .forgot{
+    font-size:0.78rem;
+    color:var(--coral-soft);
+    text-decoration:none;
+  }
+  .forgot:hover{ text-decoration:underline; }
+
+  .submit{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:none;
+    font-size:0.9rem;
+    font-weight:700;
+    letter-spacing:0.02em;
+    color:#0a0a0a;
+    background: linear-gradient(100deg, var(--coral), var(--amber));
+    cursor:pointer;
+    box-shadow: 0 10px 26px -10px rgba(255,93,115,0.55);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .submit:hover{ transform: translateY(-2px); box-shadow: 0 14px 30px -10px rgba(255,93,115,0.7); }
+  .submit:active{ transform: translateY(0); }
+
+  .divider{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:24px 0 18px;
+    color:rgba(255,255,255,0.3);
+    font-size:0.7rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+  }
+  .divider::before, .divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background: var(--line);
+  }
+
+  .alt{
+    width:100%;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background:transparent;
+    color:#fff;
+    font-size:0.85rem;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .alt:hover{ background:rgba(255,255,255,0.06); transform: translateY(-1px); }
+
+  .alt .dot{
+    width:8px; height:8px; border-radius:50%;
+    background: var(--amber);
+  }
+
+  .footer-line{
+    text-align:center;
+    margin-top:24px;
+    font-size:0.8rem;
+    color:var(--text-dim);
+  }
+  .footer-line a{ color:#fff; font-weight:600; text-decoration:none; }
+  .footer-line a:hover{ text-decoration:underline; }
+
+  @keyframes shine { 0%{background-position:220% center;} 100%{background-position:-120% center;} }
+  @keyframes riseIn { from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  }
+</style>
+</head>
+
+<body>
+
+  <div class="bg-base"></div>
+  <canvas id="network"></canvas>
+  <div class="grain"></div>
+  <div class="vignette"></div>
+
+  <div class="card">
+    <div class="wordmark">UNIDATE</div>
+    <div class="eyebrow">Welcome back</div>
+
+    <div class="field">
+      <label for="email">College email</label>
+      <input id="email" type="email" placeholder="you@university.edu" autocomplete="email">
+      <small class="hint">Use your .edu address to keep the campus verified.</small>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <div class="row-between">
+      <label class="remember">
+        <input type="checkbox" id="remember">
+        Stay signed in
+      </label>
+      <a class="forgot" href="#">Forgot password?</a>
+    </div>
+
+    <button class="submit" type="button">Sign in</button>
+
+    <div class="divider">or</div>
+
+    <button class="alt" type="button"><span class="dot"></span> Continue with college SSO</button>
+
+    <p class="footer-line">New to campus? <a href="#">Create an account</a></p>
+  </div>
+
+<script>
+  const canvas = document.getElementById('network');
+  const ctx = canvas.getContext('2d');
+  let W, H, nodes;
+  const MAX_DIST = 150;
+
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    const count = Math.min(100, Math.floor((W*H)/18000));
+    nodes = Array.from({length: count}, () => ({
+      x: Math.random()*W,
+      y: Math.random()*H,
+      vx: (Math.random()-0.5)*0.22,
+      vy: (Math.random()-0.5)*0.22,
+      r: Math.random()*1.5 + 0.6
+    }));
+  }
+
+  const mouse = { x: -9999, y: -9999 };
+  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+
+  function step(){
+    ctx.clearRect(0,0,W,H);
+    for(const n of nodes){
+      n.x += n.vx; n.y += n.vy;
+      if(n.x < 0 || n.x > W) n.vx *= -1;
+      if(n.y < 0 || n.y > H) n.vy *= -1;
+    }
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const a = nodes[i], b = nodes[j];
+        const dx=a.x-b.x, dy=a.y-b.y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist < MAX_DIST){
+          const alpha = (1 - dist/MAX_DIST) * 0.14;
+          ctx.strokeStyle = `rgba(255,140,150,${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+          ctx.stroke();
+        }
+      }
+      const dxm=nodes[i].x-mouse.x, dym=nodes[i].y-mouse.y;
+      const dm=Math.sqrt(dxm*dxm+dym*dym);
+      if(dm < 170){
+        const alpha=(1-dm/170)*0.3;
+        ctx.strokeStyle=`rgba(255,177,94,${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x,nodes[i].y); ctx.lineTo(mouse.x,mouse.y);
+        ctx.stroke();
+      }
+    }
+    for(const n of nodes){
+      ctx.beginPath();
+      ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.32)';
+      ctx.fill();
+    }
+    requestAnimationFrame(step);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  step();
+
+  document.querySelector('.submit').addEventListener('click', () => {
+    const email = document.getElementById('email').value.trim();
+    const pw = document.getElementById('password').value;
+    if(!email || !pw){
+      document.getElementById('email').style.borderColor = !email ? 'var(--coral)' : '';
+      document.getElementById('password').style.borderColor = !pw ? 'var(--coral)' : '';
+      return;
+    }
+    alert('Sign-in flow goes here — wire this up to your auth backend.');
+  });
+</script>
+
+</body>
+</html>
