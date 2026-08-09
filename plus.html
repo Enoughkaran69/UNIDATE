@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNIDATE Plus</title>
+
+<style>
+  :root{
+    --bg: #050505;
+    --coral: #ff5d73;
+    --coral-soft: #ff8fa3;
+    --amber: #ffb15e;
+    --mint: #6ee7c7;
+    --sky: #7ec8ff;
+    --line: rgba(255,255,255,0.10);
+    --text-dim: rgba(255,255,255,0.55);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; background:var(--bg); color:#fff; font-family:'Helvetica Neue', Arial, sans-serif; }
+  body{ display:flex; justify-content:center; overflow:hidden; }
+
+  .app{
+    position:relative;
+    width:100%;
+    max-width:430px;
+    height:100vh; height:100dvh;
+    display:flex; flex-direction:column;
+    background:
+      radial-gradient(ellipse 75% 40% at 50% 0%, rgba(255,93,115,0.20), transparent 62%),
+      radial-gradient(ellipse 60% 30% at 85% 60%, rgba(255,177,94,0.12), transparent 60%),
+      #050505;
+    overflow:hidden;
+  }
+
+  .grain{
+    position:absolute; inset:0; z-index:5; pointer-events:none;
+    opacity:0.045; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .topbar{
+    display:flex; justify-content:flex-end;
+    padding:16px 18px 0;
+    position:relative; z-index:3;
+  }
+  .close-btn{
+    width:34px; height:34px; border-radius:50%;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.05);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; cursor:pointer;
+  }
+  .close-btn svg{ width:15px; height:15px; }
+
+  .scroll{
+    flex:1;
+    overflow-y:auto;
+    position:relative; z-index:2;
+    padding: 4px 24px 0;
+  }
+  .scroll::-webkit-scrollbar{ display:none; }
+
+  /* ---------- hero ---------- */
+  .hero{
+    text-align:center;
+    padding:14px 0 22px;
+  }
+  .crown{
+    width:64px; height:64px;
+    border-radius:20px;
+    margin:0 auto 16px;
+    background: linear-gradient(135deg, var(--coral), var(--amber));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 14px 34px -12px rgba(255,93,115,0.55);
+  }
+  .crown svg{ width:30px; height:30px; color:#0a0a0a; }
+
+  .hero h1{
+    font-size:1.55rem;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    margin-bottom:8px;
+  }
+  .hero h1 span{
+    background: linear-gradient(100deg, var(--coral-soft), var(--amber));
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .hero p{
+    font-size:0.86rem;
+    color: var(--text-dim);
+    line-height:1.5;
+    max-width:300px;
+    margin:0 auto;
+  }
+
+  /* ---------- feature list ---------- */
+  .features{
+    display:flex; flex-direction:column; gap:12px;
+    margin-bottom:26px;
+  }
+  .feature{
+    display:flex; align-items:center; gap:13px;
+    padding:13px 15px;
+    border-radius:14px;
+    background: rgba(255,255,255,0.03);
+    border:1px solid var(--line);
+  }
+  .feature .ic{
+    width:36px; height:36px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .feature .ic svg{ width:18px; height:18px; }
+  .feature .t{ font-size:0.87rem; font-weight:700; }
+  .feature .s{ font-size:0.74rem; color: var(--text-dim); margin-top:1px; }
+
+  /* ---------- plan selector ---------- */
+  .plans{
+    display:flex; flex-direction:column; gap:10px;
+    margin-bottom:18px;
+  }
+  .plan{
+    position:relative;
+    display:flex; align-items:center; gap:14px;
+    padding:15px 16px;
+    border-radius:16px;
+    border:1.5px solid var(--line);
+    background: rgba(255,255,255,0.03);
+    cursor:pointer;
+    transition: all 0.2s ease;
+  }
+  .plan.selected{
+    border-color: var(--coral-soft);
+    background: rgba(255,93,115,0.09);
+  }
+
+  .radio{
+    width:20px; height:20px;
+    border-radius:50%;
+    border:2px solid var(--line);
+    flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    transition: border-color 0.2s ease;
+  }
+  .plan.selected .radio{ border-color: var(--coral); }
+  .radio .dot{
+    width:10px; height:10px; border-radius:50%;
+    background: linear-gradient(100deg, var(--coral), var(--amber));
+    opacity:0;
+    transform: scale(0.5);
+    transition: all 0.2s ease;
+  }
+  .plan.selected .radio .dot{ opacity:1; transform: scale(1); }
+
+  .plan-mid{ flex:1; }
+  .plan-name{ font-size:0.92rem; font-weight:700; }
+  .plan-sub{ font-size:0.75rem; color: var(--text-dim); margin-top:2px; }
+
+  .plan-price{ text-align:right; }
+  .plan-price .amt{ font-size:0.95rem; font-weight:800; }
+  .plan-price .per{ font-size:0.7rem; color: var(--text-dim); }
+
+  .badge{
+    position:absolute;
+    top:-10px; left:16px;
+    padding:3px 10px;
+    border-radius:100px;
+    font-size:0.62rem;
+    font-weight:800;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    background: linear-gradient(100deg, var(--coral), var(--amber));
+    color:#0a0a0a;
+  }
+
+  .save-tag{
+    font-size:0.68rem;
+    font-weight:700;
+    color: var(--mint);
+    margin-top:2px;
+  }
+
+  .trust-row{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    font-size:0.72rem;
+    color: var(--text-dim);
+    margin-bottom:14px;
+  }
+  .trust-row svg{ width:13px; height:13px; color: var(--mint); }
+
+  /* ---------- footer ---------- */
+  .footer{
+    padding: 10px 24px calc(18px + env(safe-area-inset-bottom));
+    position:relative; z-index:3;
+    background: linear-gradient(to top, #050505 60%, transparent);
+  }
+
+  .subscribe-btn{
+    width:100%;
+    padding:16px;
+    border-radius:14px;
+    border:none;
+    font-size:0.95rem;
+    font-weight:800;
+    letter-spacing:0.01em;
+    color:#0a0a0a;
+    background: linear-gradient(100deg, var(--coral), var(--amber));
+    cursor:pointer;
+    box-shadow: 0 12px 28px -10px rgba(255,93,115,0.55);
+    transition: transform 0.2s ease;
+  }
+  .subscribe-btn:hover{ transform: translateY(-2px); }
+
+  .fine-print{
+    text-align:center;
+    font-size:0.68rem;
+    color: rgba(255,255,255,0.32);
+    margin-top:12px;
+    line-height:1.5;
+  }
+  .fine-print a{ color: rgba(255,255,255,0.5); text-decoration:underline; }
+
+  .links-row{
+    display:flex; justify-content:center; gap:16px;
+    margin-top:10px;
+  }
+  .links-row a{
+    font-size:0.72rem;
+    color: var(--text-dim);
+    text-decoration:none;
+  }
+  .links-row a:hover{ text-decoration:underline; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <div class="grain"></div>
+
+  <div class="topbar">
+    <div class="close-btn" id="closeBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+    </div>
+  </div>
+
+  <div class="scroll">
+
+    <div class="hero">
+      <div class="crown">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 18l2-11 5 5 3-8 3 8 5-5 2 11z"/></svg>
+      </div>
+      <h1>Meet more of<br><span>your campus</span></h1>
+      <p>Unlock unlimited likes, see who's already into you, and get priority in the deck.</p>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="ic" style="background:rgba(255,93,115,0.15); color:var(--coral-soft)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-6.7-4.3-9.3-8.1C1 10.2 1.8 6.7 4.7 5.3 7 4.2 9.5 5 11 7c1.5-2 4-2.8 6.3-1.7 2.9 1.4 3.7 4.9 2 7.6C18.7 16.7 12 21 12 21z"/></svg>
+        </div>
+        <div>
+          <div class="t">Unlimited likes</div>
+          <div class="s">Stop waiting for your daily limit to reset</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="ic" style="background:rgba(126,200,255,0.15); color:var(--sky)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div>
+          <div class="t">See who liked you</div>
+          <div class="s">Skip the guessing and match instantly</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="ic" style="background:rgba(255,177,94,0.15); color:var(--amber)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 14.9 8.6 22 9.3 16.6 14 18.2 21 12 17.3 5.8 21 7.4 14 2 9.3 9.1 8.6"/></svg>
+        </div>
+        <div>
+          <div class="t">5 Superlikes a week</div>
+          <div class="s">Stand out at the top of their deck</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="ic" style="background:rgba(110,231,199,0.15); color:var(--mint)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div>
+          <div class="t">Browse other campuses</div>
+          <div class="s">Visiting somewhere? Match there too</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="plans" id="plans">
+      <div class="plan" data-plan="monthly" data-price="9.99" data-per="mo">
+        <div class="radio"><div class="dot"></div></div>
+        <div class="plan-mid">
+          <div class="plan-name">1 month</div>
+          <div class="plan-sub">Billed monthly</div>
+        </div>
+        <div class="plan-price">
+          <div class="amt">$9.99</div>
+          <div class="per">/mo</div>
+        </div>
+      </div>
+
+      <div class="plan selected" data-plan="sixmonth" data-price="5.99" data-per="mo">
+        <span class="badge">Best value</span>
+        <div class="radio"><div class="dot"></div></div>
+        <div class="plan-mid">
+          <div class="plan-name">6 months</div>
+          <div class="plan-sub">Billed $35.94 every 6 months</div>
+          <div class="save-tag">Save 40%</div>
+        </div>
+        <div class="plan-price">
+          <div class="amt">$5.99</div>
+          <div class="per">/mo</div>
+        </div>
+      </div>
+
+      <div class="plan" data-plan="weekly" data-price="4.99" data-per="wk">
+        <div class="radio"><div class="dot"></div></div>
+        <div class="plan-mid">
+          <div class="plan-name">1 week</div>
+          <div class="plan-sub">Billed weekly · try it out</div>
+        </div>
+        <div class="plan-price">
+          <div class="amt">$4.99</div>
+          <div class="per">/wk</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="trust-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Cancel anytime, no questions asked
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <button class="subscribe-btn" id="subscribeBtn">Continue — $5.99/mo</button>
+    <div class="fine-print">
+      Recurring billing. Cancel anytime from Settings. By continuing you agree to UNIDATE's <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
+    </div>
+    <div class="links-row">
+      <a href="#">Restore purchase</a>
+      <a href="#">Compare all plans</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const plans = document.querySelectorAll('.plan');
+  const subscribeBtn = document.getElementById('subscribeBtn');
+
+  function updateCTA(planEl){
+    const price = planEl.dataset.price;
+    const per = planEl.dataset.per;
+    subscribeBtn.textContent = `Continue — $${price}/${per}`;
+  }
+
+  plans.forEach(p => {
+    p.addEventListener('click', () => {
+      plans.forEach(x => x.classList.remove('selected'));
+      p.classList.add('selected');
+      updateCTA(p);
+    });
+  });
+
+  updateCTA(document.querySelector('.plan.selected'));
+
+  subscribeBtn.addEventListener('click', () => {
+    alert('This would launch the platform payment sheet (App Store / Play Billing / Stripe).');
+  });
+
+  document.getElementById('closeBtn').addEventListener('click', () => {
+    alert('This would dismiss the paywall and return to the previous screen.');
+  });
+</script>
+
+</body>
+</html>
