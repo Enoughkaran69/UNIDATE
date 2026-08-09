@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign up · UNIDATE</title>
+
+<style>
+  :root{
+    --bg: #050505;
+    --coral: #ff5d73;
+    --coral-soft: #ff8fa3;
+    --amber: #ffb15e;
+    --mint: #6ee7c7;
+    --sky: #7ec8ff;
+    --line: rgba(255,255,255,0.10);
+    --text-dim: rgba(255,255,255,0.55);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; background:var(--bg); color:#fff; font-family:'Helvetica Neue', Arial, sans-serif; overflow:hidden; }
+  body{ display:flex; justify-content:center; }
+
+  .app{
+    position:relative;
+    width:100%;
+    max-width:430px;
+    height:100vh; height:100dvh;
+    display:flex; flex-direction:column;
+    background:
+      radial-gradient(ellipse 60% 32% at 18% 0%, rgba(255,93,115,0.15), transparent 60%),
+      radial-gradient(ellipse 55% 32% at 88% 90%, rgba(255,177,94,0.10), transparent 60%),
+      #050505;
+    overflow:hidden;
+  }
+
+  .grain{
+    position:absolute; inset:0; z-index:5; pointer-events:none;
+    opacity:0.045; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- top ---------- */
+  .topbar{
+    display:flex; align-items:center; gap:14px;
+    padding:18px 20px 4px;
+    position:relative; z-index:2;
+  }
+  .icon-btn{
+    width:38px; height:38px; border-radius:50%;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.04);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; cursor:pointer; flex-shrink:0;
+    transition: background 0.2s ease, opacity 0.2s ease;
+  }
+  .icon-btn:hover{ background: rgba(255,255,255,0.08); }
+  .icon-btn.hidden{ visibility:hidden; }
+  .icon-btn svg{ width:16px; height:16px; }
+
+  .progress{
+    flex:1;
+    display:flex; gap:6px;
+  }
+  .progress .seg{
+    flex:1; height:4px; border-radius:100px;
+    background: rgba(255,255,255,0.1);
+    overflow:hidden;
+  }
+  .progress .seg .fill{
+    height:100%; width:0%;
+    background: linear-gradient(90deg, var(--coral), var(--amber));
+    transition: width 0.4s ease;
+  }
+
+  .step-count{
+    font-size:0.7rem; color: var(--text-dim); flex-shrink:0;
+  }
+
+  /* ---------- body ---------- */
+  .body-scroll{
+    flex:1;
+    overflow-y:auto;
+    position:relative; z-index:2;
+    padding: 18px 24px 10px;
+  }
+  .body-scroll::-webkit-scrollbar{ display:none; }
+
+  .step{
+    display:none;
+  }
+  .step.active{
+    display:block;
+    animation: riseIn 0.4s ease forwards;
+  }
+
+  @keyframes riseIn{ from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:translateY(0);} }
+
+  .step h2{
+    font-size:1.4rem;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    margin-bottom:6px;
+  }
+  .step .sub{
+    font-size:0.85rem;
+    color: var(--text-dim);
+    margin-bottom:26px;
+    line-height:1.5;
+  }
+
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block;
+    font-size:0.72rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color: var(--text-dim);
+    margin-bottom:7px;
+    font-weight:600;
+  }
+  .field input{
+    width:100%;
+    padding:13px 14px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.04);
+    color:#fff;
+    font-size:0.92rem;
+    outline:none;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  }
+  .field input::placeholder{ color: rgba(255,255,255,0.28); }
+  .field input:focus{
+    border-color: var(--coral-soft);
+    background: rgba(255,93,115,0.06);
+    box-shadow: 0 0 0 3px rgba(255,93,115,0.12);
+  }
+  .field small.hint{
+    display:block;
+    margin-top:6px;
+    font-size:0.7rem;
+    color: rgba(255,255,255,0.32);
+  }
+  .field small.hint.ok{ color: var(--mint); }
+  .field small.hint.err{ color: var(--coral-soft); }
+
+  .pw-row{ display:flex; gap:5px; margin-top:8px; }
+  .pw-row .bar{
+    flex:1; height:3px; border-radius:100px;
+    background: rgba(255,255,255,0.1);
+  }
+  .pw-row .bar.on1{ background: var(--coral); }
+  .pw-row .bar.on2{ background: var(--amber); }
+  .pw-row .bar.on3{ background: var(--mint); }
+
+  /* pill selectors */
+  .pill-grid{
+    display:flex; flex-wrap:wrap; gap:9px;
+  }
+  .pill{
+    padding:11px 18px;
+    border-radius:100px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.04);
+    font-size:0.85rem;
+    cursor:pointer;
+    transition: all 0.18s ease;
+  }
+  .pill.selected{
+    background: linear-gradient(100deg, var(--coral), var(--amber));
+    color:#0a0a0a;
+    font-weight:700;
+    border-color:transparent;
+  }
+
+  .tag-grid{
+    display:flex; flex-wrap:wrap; gap:9px;
+  }
+  .tag-pill{
+    padding:9px 15px;
+    border-radius:100px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.04);
+    font-size:0.8rem;
+    cursor:pointer;
+    transition: all 0.18s ease;
+  }
+  .tag-pill.selected{
+    border-color: var(--coral-soft);
+    background: rgba(255,93,115,0.14);
+    color: var(--coral-soft);
+    font-weight:600;
+  }
+
+  .tag-count{
+    font-size:0.72rem;
+    color: var(--text-dim);
+    margin-top:14px;
+    text-align:center;
+  }
+
+  .terms{
+    display:flex; align-items:flex-start; gap:9px;
+    margin-top:22px;
+    font-size:0.78rem;
+    color: var(--text-dim);
+    line-height:1.5;
+  }
+  .terms input{ margin-top:3px; accent-color: var(--coral); flex-shrink:0; }
+  .terms a{ color:#fff; font-weight:600; text-decoration:none; }
+  .terms a:hover{ text-decoration:underline; }
+
+  /* ---------- footer ---------- */
+  .footer{
+    padding: 12px 24px calc(20px + env(safe-area-inset-bottom));
+    position:relative; z-index:2;
+  }
+  .primary-btn{
+    width:100%;
+    padding:15px;
+    border-radius:14px;
+    border:none;
+    font-size:0.92rem;
+    font-weight:700;
+    letter-spacing:0.01em;
+    color:#0a0a0a;
+    background: linear-gradient(100deg, var(--coral), var(--amber));
+    cursor:pointer;
+    box-shadow: 0 10px 26px -10px rgba(255,93,115,0.55);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  }
+  .primary-btn:hover{ transform: translateY(-2px); }
+  .primary-btn:disabled{ opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+
+  .signin-line{
+    text-align:center;
+    margin-top:16px;
+    font-size:0.8rem;
+    color: var(--text-dim);
+  }
+  .signin-line a{ color:#fff; font-weight:600; text-decoration:none; }
+  .signin-line a:hover{ text-decoration:underline; }
+
+  /* ---------- success screen ---------- */
+  #successView{
+    position:absolute; inset:0;
+    z-index:15;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:40px;
+    background: #050505;
+  }
+  #successView.show{ display:flex; }
+
+  .success-badge{
+    width:88px; height:88px;
+    border-radius:50%;
+    background: linear-gradient(135deg, var(--coral), var(--amber));
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:26px;
+    opacity:0;
+    animation: popIn 0.5s cubic-bezier(.2,1.4,.4,1) forwards 0.1s;
+  }
+  .success-badge svg{ width:38px; height:38px; color:#0a0a0a; }
+
+  @keyframes popIn{
+    from{ opacity:0; transform:scale(0.5); }
+    to{ opacity:1; transform:scale(1); }
+  }
+
+  #successView h2{
+    font-size:1.6rem;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    margin-bottom:10px;
+    opacity:0;
+    animation: riseIn 0.6s ease forwards 0.3s;
+  }
+  #successView p{
+    font-size:0.88rem;
+    color: var(--text-dim);
+    line-height:1.6;
+    margin-bottom:30px;
+    opacity:0;
+    animation: riseIn 0.6s ease forwards 0.45s;
+    max-width:280px;
+  }
+  #successView .primary-btn{
+    max-width:260px;
+    opacity:0;
+    animation: riseIn 0.6s ease forwards 0.6s;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <div class="grain"></div>
+
+  <div class="topbar">
+    <div class="icon-btn" id="backBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <div class="progress">
+      <div class="seg"><div class="fill" id="fill1"></div></div>
+      <div class="seg"><div class="fill" id="fill2"></div></div>
+      <div class="seg"><div class="fill" id="fill3"></div></div>
+    </div>
+    <div class="step-count" id="stepCount">1 / 3</div>
+  </div>
+
+  <div class="body-scroll">
+
+    <!-- STEP 1 -->
+    <div class="step active" data-step="1">
+      <h2>Let's get you set up</h2>
+      <p class="sub">Just the basics for now — you can add more to your profile later.</p>
+
+      <div class="field">
+        <label for="fullName">Full name</label>
+        <input id="fullName" type="text" placeholder="Your name">
+      </div>
+
+      <div class="field">
+        <label for="dob">Date of birth</label>
+        <input id="dob" type="date">
+        <small class="hint">You must be 18+ to use UNIDATE.</small>
+      </div>
+
+      <div class="field">
+        <label for="email">College email</label>
+        <input id="email" type="email" placeholder="you@university.edu">
+        <small class="hint" id="emailHint">We'll send a verification link to confirm you're a student.</small>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" data-step="2">
+      <h2>Secure your account</h2>
+      <p class="sub">Pick a password only you know — no sharing this one.</p>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="At least 8 characters">
+        <div class="pw-row">
+          <div class="bar" id="bar1"></div>
+          <div class="bar" id="bar2"></div>
+          <div class="bar" id="bar3"></div>
+        </div>
+        <small class="hint" id="pwHint">Use a mix of letters, numbers, and symbols.</small>
+      </div>
+
+      <div class="field">
+        <label for="confirm">Confirm password</label>
+        <input id="confirm" type="password" placeholder="Re-enter password">
+      </div>
+
+      <div class="field" style="margin-top:26px;">
+        <label>I am</label>
+        <div class="pill-grid" id="genderGrid">
+          <div class="pill" data-val="Woman">Woman</div>
+          <div class="pill" data-val="Man">Man</div>
+          <div class="pill" data-val="Non-binary">Non-binary</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Show me</label>
+        <div class="pill-grid" id="prefGrid">
+          <div class="pill" data-val="Women">Women</div>
+          <div class="pill" data-val="Men">Men</div>
+          <div class="pill" data-val="Everyone">Everyone</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" data-step="3">
+      <h2>What are you into?</h2>
+      <p class="sub">Pick a few — these help us show you better matches on campus.</p>
+
+      <div class="tag-grid" id="interestGrid">
+        <div class="tag-pill">☕ Coffee runs</div>
+        <div class="tag-pill">📚 Library nights</div>
+        <div class="tag-pill">🏀 Sports</div>
+        <div class="tag-pill">🎮 Gaming</div>
+        <div class="tag-pill">🎨 Art & design</div>
+        <div class="tag-pill">🎵 Music</div>
+        <div class="tag-pill">✈️ Travel</div>
+        <div class="tag-pill">🍜 Foodie</div>
+        <div class="tag-pill">🧘 Wellness</div>
+        <div class="tag-pill">🎬 Movies</div>
+        <div class="tag-pill">🐾 Pets</div>
+        <div class="tag-pill">🏕️ Outdoors</div>
+      </div>
+      <div class="tag-count"><span id="tagCount">0</span> selected · pick at least 3</div>
+
+      <label class="terms">
+        <input type="checkbox" id="termsCheck">
+        I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a>, and confirm I'm currently enrolled as a student.
+      </label>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <button class="primary-btn" id="nextBtn">Continue</button>
+    <p class="signin-line">Already have an account? <a href="#">Sign in</a></p>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="successView">
+    <div class="success-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>You're in!</h2>
+    <p>Your account is created. Verify your college email to unlock messaging and start matching with students on your campus.</p>
+    <button class="primary-btn" id="startBtn">Start exploring</button>
+  </div>
+
+</div>
+
+<script>
+  let currentStep = 1;
+  const totalSteps = 3;
+  const fills = { 1: document.getElementById('fill1'), 2: document.getElementById('fill2'), 3: document.getElementById('fill3') };
+  const stepEls = document.querySelectorAll('.step');
+  const nextBtn = document.getElementById('nextBtn');
+  const backBtn = document.getElementById('backBtn');
+  const stepCount = document.getElementById('stepCount');
+
+  function updateProgress(){
+    for(let i=1;i<=totalSteps;i++){
+      fills[i].style.width = i <= currentStep ? '100%' : '0%';
+    }
+    stepCount.textContent = `${currentStep} / ${totalSteps}`;
+    stepEls.forEach(s => s.classList.toggle('active', Number(s.dataset.step) === currentStep));
+    nextBtn.textContent = currentStep === totalSteps ? 'Create account' : 'Continue';
+    backBtn.classList.toggle('hidden', currentStep === 1);
+  }
+
+  // ---- pill selectors (single select) ----
+  function setupSingleSelect(gridId){
+    const grid = document.getElementById(gridId);
+    grid.querySelectorAll('.pill').forEach(p => {
+      p.addEventListener('click', () => {
+        grid.querySelectorAll('.pill').forEach(x => x.classList.remove('selected'));
+        p.classList.add('selected');
+      });
+    });
+  }
+  setupSingleSelect('genderGrid');
+  setupSingleSelect('prefGrid');
+
+  // ---- interest multi-select ----
+  const tagCountEl = document.getElementById('tagCount');
+  document.querySelectorAll('.tag-pill').forEach(t => {
+    t.addEventListener('click', () => {
+      t.classList.toggle('selected');
+      tagCountEl.textContent = document.querySelectorAll('.tag-pill.selected').length;
+    });
+  });
+
+  // ---- password strength ----
+  const pwInput = document.getElementById('password');
+  const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3')];
+  pwInput.addEventListener('input', () => {
+    const v = pwInput.value;
+    let score = 0;
+    if(v.length >= 8) score++;
+    if(/[0-9]/.test(v) && /[a-zA-Z]/.test(v)) score++;
+    if(/[^a-zA-Z0-9]/.test(v)) score++;
+    bars.forEach((b, i) => {
+      b.className = 'bar';
+      if(i < score){
+        b.classList.add(score === 1 ? 'on1' : score === 2 ? 'on2' : 'on3');
+      }
+    });
+  });
+
+  // ---- email hint ----
+  const emailInput = document.getElementById('email');
+  const emailHint = document.getElementById('emailHint');
+  emailInput.addEventListener('input', () => {
+    const v = emailInput.value.trim();
+    if(v.length === 0){
+      emailHint.textContent = "We'll send a verification link to confirm you're a student.";
+      emailHint.className = 'hint';
+    } else if(v.endsWith('.edu') || v.includes('.ac.')){
+      emailHint.textContent = "Looks like a valid student email.";
+      emailHint.className = 'hint ok';
+    } else {
+      emailHint.textContent = "Use your college email so we can verify your campus.";
+      emailHint.className = 'hint err';
+    }
+  });
+
+  function shake(el){
+    el.style.transition = 'transform 0.06s';
+    let n = 0;
+    const iv = setInterval(() => {
+      el.style.transform = `translateX(${n % 2 === 0 ? 6 : -6}px)`;
+      n++;
+      if(n > 4){ clearInterval(iv); el.style.transform = ''; }
+    }, 60);
+  }
+
+  function validateStep(){
+    if(currentStep === 1){
+      const name = document.getElementById('fullName');
+      const dob = document.getElementById('dob');
+      const email = document.getElementById('email');
+      let ok = true;
+      if(!name.value.trim()){ shake(name); ok = false; }
+      if(!dob.value){ shake(dob); ok = false; }
+      if(!email.value.trim()){ shake(email); ok = false; }
+      return ok;
+    }
+    if(currentStep === 2){
+      const pw = document.getElementById('password');
+      const confirm = document.getElementById('confirm');
+      let ok = true;
+      if(pw.value.length < 8){ shake(pw); ok = false; }
+      if(confirm.value !== pw.value || !confirm.value){ shake(confirm); ok = false; }
+      return ok;
+    }
+    if(currentStep === 3){
+      const selected = document.querySelectorAll('.tag-pill.selected').length;
+      const terms = document.getElementById('termsCheck');
+      let ok = true;
+      if(selected < 3){ shake(document.getElementById('interestGrid')); ok = false; }
+      if(!terms.checked){ shake(document.querySelector('.terms')); ok = false; }
+      return ok;
+    }
+    return true;
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if(!validateStep()) return;
+    if(currentStep < totalSteps){
+      currentStep++;
+      updateProgress();
+      document.querySelector('.body-scroll').scrollTop = 0;
+    } else {
+      document.getElementById('successView').classList.add('show');
+    }
+  });
+
+  backBtn.addEventListener('click', () => {
+    if(currentStep > 1){
+      currentStep--;
+      updateProgress();
+    }
+  });
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    alert('This would take you to the Discover screen (unidate-discover.html).');
+  });
+
+  updateProgress();
+</script>
+
+</body>
+</html>
